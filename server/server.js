@@ -5,9 +5,6 @@ require("dotenv").config();
 const cors = require("cors");
 const weather = require("../data/weather.json");
 
-// const test = JSON.parse(items);
-// console.log(test);
-
 const app = express();
 
 app.use(cors());

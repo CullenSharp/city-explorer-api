@@ -41,8 +41,20 @@ Estimate of time needed to complete: 1hr
 
 Start time: 14:34
 
-Finish time:
+Finish time: 15:40
 
-Actual time needed to complete:
+Actual time needed to complete: 1:10hrs
+
+---
+
+Name of feature: Error revisited
+
+Estimate of time needed to complete: 1hr
+
+Start time: 14:34
+
+Finish time: 15:40
+
+Actual time needed to complete: 1:10hrs
 
 <!--  -->
