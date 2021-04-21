@@ -6,7 +6,7 @@ require('dotenv').config();
 // Application Dependenices
 const cors = require('cors');
 const express = require('express');
-const axios = require('axios')
+const superagent = require('superagent')
 
 // Our Dependencies
 const weather = require('../data/weather.json');
@@ -17,7 +17,6 @@ const app = express(); //express() creates an Express application
 app.use(cors()); // When a request comes in use cors to check it
 
 // Route Definitions
-app.get('/weather', getWeatherHandler);
 
 
 
@@ -40,15 +39,27 @@ app.get('/weather', getWeatherHandler);
 
 
 async function getWeatherHandler(request, response) {
-  const url =`https://api.weatherbit.io/v2.0/current?lat=${request.query.lat}&lon=${request.query.lon}&key=${process.env.WEATHER_KEY}`;
+  try {
+    const lat = request.query.lat;
+    const lon = request.query.lon;
 
-  const weatherResponse = await axios.get(url);
-  const forcasts = weatherResponse.data.data.map(day => new Forcast(day))
+    const key = process.env.WEATHER_KEY;
 
-  console.log(forcasts);
-  response.send(forcasts);
+    const url = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&key=${process.env.WEATHER_KEY}`;
+
+    const weatherResponse = await superagent.get(url);
+
+    const weatherObject = JSON.parse(weatherResponse.text);
+
+    const forcasts = weatherObject.data.map(day => new Forcast(day))
+
+    response.send(forcasts);
+  } catch(error) {
+    console.log(error);
+  }
 }
 
+app.get('/weather', getWeatherHandler);
 
 
 class Forcast {
