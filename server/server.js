@@ -30,9 +30,11 @@ app.get("/weather", (request, response) => {
   response.send(weatherArray);
 });
 
-function Forcast(day) {
-  this.date = day.valid_date;
-  this.description = day.weather.description;
+class Forcast {
+  constructor(day){
+    this.date = day.valid_date;
+    this.description = day.weather.description;
+  }
 }
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
