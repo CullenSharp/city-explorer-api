@@ -57,7 +57,7 @@ async function getWeatherHandler(request, response) {
 
     response.send(forcasts);
   } catch (error) {
-    console.log(error.status, error.text);
+    console.log("In /weather", `Error code: ${error.status}`, error.text);
   }
 }
 
@@ -73,7 +73,7 @@ async function getMovieHandler(request, response) {
     const city_name = request.query.city_name;
     const key = process.env.MOVIE_KEY;
 
-    const url = `https://api.themoviedb.org/3/search/movie?api_key=${key}&query=Seattle`
+    const url = `https://api.themoviedb.org/3/search/movie?api_key=${key}&query=${city_name}`
 
     const movieResponse = await superagent.get(url);
     const movieObject = JSON.parse(movieResponse.text);
@@ -81,7 +81,7 @@ async function getMovieHandler(request, response) {
     const movies = movieObject.results.map(movie => new Movie(movie));
     response.send(movies);
   } catch (error) {
-    console.log(error.status, error.text);
+    console.log("In /movies",`Error code: ${error.status}`, error.text);
   }
 }
 
