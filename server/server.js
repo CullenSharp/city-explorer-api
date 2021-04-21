@@ -1,40 +1,71 @@
-"use strict";
+'use strict';
 
-const express = require("express");
-require("dotenv").config();
-const cors = require("cors");
-const weather = require("../data/weather.json");
+// Load Environment Variables from .env
+require('dotenv').config();
 
-const app = express(); //express() creates an Express application
+// Application Dependenices
+const cors = require('cors');
+const express = require('express');
+const axios = require('axios')
 
-app.use(cors());
+// Our Dependencies
+const weather = require('../data/weather.json');
 
+// Application Setup
 const PORT = process.env.PORT || 3001;
+const app = express(); //express() creates an Express application
+app.use(cors()); // When a request comes in use cors to check it
 
-//app.get is the route, and expression is the handler, the first argument is the path
-app.get("/", (request, response) => {
-  response.send("Hello, world");
-});
+// Route Definitions
+app.get('/weather', getWeatherHandler);
 
-//Routes HTTP GET requests to the specified path with the specified callback functions.
-//(source: Express docs)
-app.get("/weather", (request, response) => {
-  console.log(
-    `
-    You requested weather data for:
-    Location_name: ${request.query.display_name}
-    lat: ${request.query.lat} lon: ${request.query.lon}
-    `
-  );
-  const weatherArray = weather.data.map((day) => new Forcast(day));
-  response.send(weatherArray);
-});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function getWeatherHandler(request, response) {
+  const url =`https://api.weatherbit.io/v2.0/current?lat=${request.query.lat}&lon=${request.query.lon}&key=${process.env.WEATHER_KEY}`;
+
+  const weatherResponse = await axios.get(url);
+  const forcasts = weatherResponse.data.data.map(day => new Forcast(day))
+
+  console.log(forcasts);
+  response.send(forcasts);
+}
+
+
 
 class Forcast {
-  constructor(day){
-    this.date = day.valid_date;
-    this.description = day.weather.description;
+  constructor(day) {
+    this.forcast = day.weather.description;
+    this.date = day.datetime;
   }
 }
+
+
+
+
+
+
+
+
+
+
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
