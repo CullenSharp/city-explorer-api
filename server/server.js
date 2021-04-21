@@ -45,7 +45,7 @@ async function getWeatherHandler(request, response) {
 
     const key = process.env.WEATHER_KEY;
 
-    const url = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&key=${process.env.WEATHER_KEY}`;
+    const url = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&days=7&key=${process.env.WEATHER_KEY}`;
 
     const weatherResponse = await superagent.get(url);
 
@@ -64,8 +64,8 @@ app.get('/weather', getWeatherHandler);
 
 class Forcast {
   constructor(day) {
-    this.forcast = day.weather.description;
-    this.date = day.datetime;
+    this.forcast = `Description: low of ${day.min_temp}, high of ${day.max_temp} with ${day.weather.description}`;
+    this.date = `Date: ${day.datetime}`;
   }
 }
 
