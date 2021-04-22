@@ -24,7 +24,8 @@ class Movie {
     this.overview = movie.overview;
     this.average_votes = movie.vote_average;
     this.total_votes = movie.vote_count;
-    this.img_url = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+    this.img_path = movie.poster_path || movie.backdrop_path;
+    this.img_url = this.img_path ? `https://image.tmdb.org/t/p/w500${this.img_path}` : 'https://www.placecage.com/g/500/750';
     this.popularity = movie.popularity;
     this.released_on = movie.release_date;
   }
