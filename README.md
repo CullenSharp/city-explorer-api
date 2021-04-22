@@ -14,6 +14,7 @@ git clone, npm install
 ## Architecture
 
 ![flow](flow.png)
+![flow](WRRCday9.png)
 
 ## Change Log
 
