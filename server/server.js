@@ -19,19 +19,9 @@ app.use(cors()); // When a request comes in use cors to check it
 // Route Definitions
 app.get('/weather', getWeatherHandler);
 app.get('/movies', getMovieHandler);
-
-
-
-
-
-
-
-
-
-
-
-
-
+app.get('*', (request, response) => {
+  response.status(404).send(`Can't find the page`);
+})
 
 
 
