@@ -1,21 +1,32 @@
 const superagent = require('superagent');
 
+const inMemoryDB = {};
+
 async function getWeatherHandler(request, response) {
   try {
     const lat = request.query.lat;
     const lon = request.query.lon;
 
-    const key = process.env.WEATHER_KEY;
+    const forcastAlreadyFetched = inMemoryDB[lat + lon] !== undefined && inMemoryDB.timestamp > 60000;
 
-    const url = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&days=7&key=${key}`;
+    if (forcastAlreadyFetched) {
+      const forcasts = inMemoryDB[lat + lon];
+      response.status(200).send(forcasts);
+    } else {
+      const key = process.env.WEATHER_KEY;
 
-    const weatherResponse = await superagent.get(url);
+      const url = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&days=7&key=${key}`;
 
-    const weatherObject = JSON.parse(weatherResponse.text);
+      const weatherResponse = await superagent.get(url);
 
-    const forcasts = weatherObject.data.map(day => new Forcast(day));
+      const weatherObject = JSON.parse(weatherResponse.text);
 
-    response.status(200).send(forcasts);
+      const forcasts = weatherObject.data.map(day => new Forcast(day));
+
+      inMemoryDB[lat + lon] = {forcasts, timestamp: Date.now()};
+
+      response.status(200).send(forcasts);
+    }
   } catch (error) {
     console.error(`Error from superagent ${error}`);
     response.status(500).send(`Server error ${error}`);
