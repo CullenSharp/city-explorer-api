@@ -7,11 +7,30 @@ async function getWeatherHandler(request, response) {
     const lat = request.query.lat;
     const lon = request.query.lon;
 
-    const forcastAlreadyFetched = inMemoryDB[lat + lon] !== undefined && inMemoryDB.timestamp > 60000;
-
+    const forcastAlreadyFetched = inMemoryDB[lat + lon] !== undefined;
     if (forcastAlreadyFetched) {
-      const forcasts = inMemoryDB[lat + lon];
-      response.status(200).send(forcasts);
+      if (inMemoryDB[lat + lon].timestamp + 1000 < Date.now()) {
+        const key = process.env.WEATHER_KEY;
+
+        const url = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&days=7&key=${key}`;
+
+        const weatherResponse = await superagent.get(url);
+
+        const weatherObject = JSON.parse(weatherResponse.text);
+
+        const forcasts = weatherObject.data.map(day => new Forcast(day));
+
+        inMemoryDB[lat + lon] = {
+          forcasts,
+          timestamp: Date.now()
+        };
+        console.log('data is old');
+        response.status(200).send(forcasts);
+      } else {
+        console.log('the data is still fresh');
+        const forcasts = inMemoryDB[lat + lon].forcasts;
+        response.status(200).send(forcasts);
+      }
     } else {
       const key = process.env.WEATHER_KEY;
 
@@ -23,9 +42,12 @@ async function getWeatherHandler(request, response) {
 
       const forcasts = weatherObject.data.map(day => new Forcast(day));
 
-      inMemoryDB[lat + lon] = {forcasts, timestamp: Date.now()};
-
-      response.status(200).send(forcasts);
+      inMemoryDB[lat + lon] = {
+        forcasts,
+        timestamp: Date.now()
+      };
+      console.log('data is unset');
+      response.status(200).send(inMemoryDB);
     }
   } catch (error) {
     console.error(`Error from superagent ${error}`);
