@@ -20,7 +20,7 @@ git clone, npm install
 
 ## Credit and Collaborations
 
-Coded with help from Tim Viccari, Tim Egorov, Hunter Britten, Tek Jones, Kyle Hoac and Skyler Johnson
+Coded with help from Tim Viccari, Tim Egorov, Hunter Britten, Tek Jones, Kyle Hoac, Chance Harmon and Skyler Johnson
 
 ## Time Estimates
 
