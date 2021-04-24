@@ -1,17 +1,30 @@
 const superagent = require('superagent');
 
+const inMemoryDB = {};
+
 async function getMovieHandler(request, response) {
+  const city_name = request.query.city_name;
   try {
-    const city_name = request.query.city_name;
-    const key = process.env.MOVIE_KEY;
+    const moviesAlreadyFetched = inMemoryDB[city_name] !== undefined;
+    if (moviesAlreadyFetched && (inMemoryDB[city_name].timestamp + 60000 > Date.now())) {
+      const movies = inMemoryDB[city_name];
 
-    const url = `https://api.themoviedb.org/3/search/movie?api_key=${key}&query=${city_name}`;
+      console.log('Data is fresh');
+      response.status(200).send(movies);
+    } else {
+      const key = process.env.MOVIE_KEY;
 
-    const movieResponse = await superagent.get(url);
-    const movieObject = JSON.parse(movieResponse.text);
+      const url = `https://api.themoviedb.org/3/search/movie?api_key=${key}&query=${city_name}`;
 
-    const movies = movieObject.results.map(movie => new Movie(movie));
-    response.status(200).send(movies);
+      const movieResponse = await superagent.get(url);
+      const movieObject = JSON.parse(movieResponse.text);
+
+      const movies = movieObject.results.map(movie => new Movie(movie));
+      inMemoryDB[city_name] = movies;
+      inMemoryDB[city_name].timestamp = Date.now();
+      console.log('Data is stale');
+      response.status(200).send(movies);
+    }
   } catch (error) {
     console.error(`Error from superagent ${error}`);
     response.status(500).send(`Server error ${error}`);

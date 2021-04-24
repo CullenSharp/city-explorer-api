@@ -3,51 +3,28 @@ const superagent = require('superagent');
 const inMemoryDB = {};
 
 async function getWeatherHandler(request, response) {
+  const lat = request.query.lat;
+  const lon = request.query.lon;
+
   try {
-    const lat = request.query.lat;
-    const lon = request.query.lon;
-
     const forcastAlreadyFetched = inMemoryDB[lat + lon] !== undefined;
-    if (forcastAlreadyFetched) {
-      if (inMemoryDB[lat + lon].timestamp + 1000 < Date.now()) {
-        const key = process.env.WEATHER_KEY;
-
-        const url = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&days=7&key=${key}`;
-
-        const weatherResponse = await superagent.get(url);
-
-        const weatherObject = JSON.parse(weatherResponse.text);
-
-        const forcasts = weatherObject.data.map(day => new Forcast(day));
-
-        inMemoryDB[lat + lon] = {
-          forcasts,
-          timestamp: Date.now()
-        };
-        console.log('data is old');
-        response.status(200).send(forcasts);
-      } else {
-        console.log('the data is still fresh');
-        const forcasts = inMemoryDB[lat + lon].forcasts;
-        response.status(200).send(forcasts);
-      }
+    if (forcastAlreadyFetched && (inMemoryDB[lat + lon].timestamp + 60000 > Date.now())) {
+      const forcasts = inMemoryDB[lat + lon];
+      console.log('data is fresh');
+      response.status(200).send(forcasts);
     } else {
       const key = process.env.WEATHER_KEY;
-
       const url = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&days=7&key=${key}`;
 
       const weatherResponse = await superagent.get(url);
-
       const weatherObject = JSON.parse(weatherResponse.text);
-
       const forcasts = weatherObject.data.map(day => new Forcast(day));
 
-      inMemoryDB[lat + lon] = {
-        forcasts,
-        timestamp: Date.now()
-      };
-      console.log('data is unset');
-      response.status(200).send(inMemoryDB);
+      inMemoryDB[lat + lon] = forcasts;
+      inMemoryDB[lat + lon].timestamp = Date.now();
+
+      console.log('data is stale');
+      response.status(200).send(forcasts);
     }
   } catch (error) {
     console.error(`Error from superagent ${error}`);
